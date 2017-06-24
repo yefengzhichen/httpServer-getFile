@@ -91,13 +91,13 @@ int main(int argc, char** argv)
 		}
 		int messageLen = writeMessage(sbuf.st_size, message);
 		printf("Respond message:%s\r\n", message);
-		if(messageLen < 0)
+		int n = send(connectFd, message, messageLen, 0);
+		if(n < 0)
 		{
 			printf("Send header error!\r\n");
 			exit(-1);
 		}
-		
-		int n = readVideoAndSend(connectFd, filename, sbuf);
+		n = readVideoAndSend(connectFd, filename, sbuf);
 		if(n < 0)
 		{
 			printf("Send video error!\r\n");
@@ -113,7 +113,7 @@ int writeMessage(int length, char message[])
 	string mes;
 	mes += "\r\nHTTP/1.1 ";
 	mes += "200 OK";
-	mes += "\r\nContent-Type:video/x-mpegurl ";
+	mes += "\r\nContent-Type:video/x-mpegurl";
 	mes += "\r\nServer:localhost";
 	mes += "\r\nContent-Length:" + std::to_string(length);
 	time_t timep;
@@ -143,12 +143,13 @@ int readVideoAndSend(int connectFd, string filename, struct stat sbuf)
 
 	size_t nleft = sbuf.st_size;
 	ssize_t nwritten;
-	char *bufp = (char *)srcp;
+	char *bufp = (char*) srcp;
 	while(nleft > 0)
 	{
 		printf("nleft:%d\r\n", (int)nleft);
 		if((nwritten = write(connectFd, bufp, nleft)) <= 0)
 		{
+			printf("write length:%d\r\n", (int)nwritten);
 			if(errno == EINTR)
 				nwritten = 0;
 			else
