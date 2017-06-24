@@ -134,16 +134,19 @@ int readVideoAndSend(int connectFd, string filename, struct stat sbuf)
 	if(videoFd < 0)
 	{
 		printf("Open error!");
+		exit(-1);
 	}
 	if((srcp = mmap(0, sbuf.st_size, PROT_READ, MAP_PRIVATE, videoFd, 0)) == ((void *) -1))
 	{
 		printf("Mmap error!");
+		exit(-1);
 	}
 //	close(videoFd);
 
 	size_t nleft = sbuf.st_size;
 	ssize_t nwritten;
-	char *bufp = (char*) srcp;
+//	char *bufp = (char*) srcp;
+	char *bufp = static_cast<char*> (srcp);
 	while(nleft > 0)
 	{
 		printf("nleft:%d\r\n", (int)nleft);
